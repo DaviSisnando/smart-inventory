@@ -3,10 +3,11 @@ import { Schema, model, Types } from 'mongoose'
 export interface UserFields {
     email: string;
     password: string;
-    _id: Types.ObjectId;
 }
 
-interface UserFieldsDocument extends Document {}
+interface UserFieldsDocument extends Document, UserFields {
+    _id: Types.ObjectId
+}
 
 const UserSchema: Schema = new Schema({
     email: {

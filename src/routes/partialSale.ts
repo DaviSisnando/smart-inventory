@@ -1,6 +1,6 @@
 import {Router} from "express"; 
 
-import { create, listAll, listOne, updateOne, deleteOne } from '../controllers/user'
+import { create, listAll, listOne, updateOne, deleteOne } from '../controllers/partialSale'
 
 const router = Router();
 
