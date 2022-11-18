@@ -14,14 +14,13 @@ interface ProductFieldsDocument extends Document, ProductFields {
 }
 
 const ProductSchema: Schema = new Schema({
-    codigoDoProduto: String,
+    codigoDoProduto: [{type: String, required: true}],
     nome: String,
     categoriaReferencia: {type: Types.ObjectId, required: true, ref: 'InventoryCategory'},
     categoriaProduto: String,
     marca: String,
 });
 
-//relacionar com vendaParcial também
 ProductSchema.pre('save', async function (next) {
     let { _id: id, categoriaReferencia: categoriaReferenciaId } = this;
 
