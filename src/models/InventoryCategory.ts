@@ -14,7 +14,7 @@ interface InventoryCategoryFieldsDocument extends Document, InventoryCategoryFie
 }
 
 const InventoryCategorySchema: Schema = new Schema({
-    nome: String,
+    nome: [{type: String, required: true}],
     produtosRemessa: [{type: Types.ObjectId, ref: 'Shipment'}],
     produtos: [{type: Types.ObjectId, ref: 'Product'}],
     qtdTotoalProdutosCategoria: Number,
