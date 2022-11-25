@@ -6,8 +6,8 @@ const router = Router();
 
 router.post('/', create);
 router.get('/', listAll);
-router.get('/:id', listOne);
-router.put('/:id', updateOne);
+router.get('/:email/:password', listOne);
+router.put('/:id/:password', updateOne);
 router.delete('/:id', deleteOne);
 
 export default router

@@ -10,13 +10,15 @@ const encryptedPassword = async (password: string): Promise<string> => {
 
 async function create(req: Request, res: Response) {
     try {
+        console.log(req.body)
         const { email, password } = req.body
         
         const hash = await encryptedPassword(password)
         const user = await User.create({ email, password: hash })
+        
         return res.status(201).json({ data: user })
     } catch(e) {
-        return res.status(400).json({ error: e })
+        return res.status(404).json({ error: e })
     }
 }
 
@@ -31,10 +33,12 @@ async function listAll(_req: Request, res: Response) {
 
 async function listOne(req: Request, res: Response) {
     try {
-        const { id } = req.params
+        const { email, password } = req.params
 
-        const user = await User.findById(id)
+        const user = await User.findOne({"email": email})
         if (!user) return res.status(404).json({ error: 'User not found.' })
+
+        if (user.password == await encryptedPassword(password))
         return res.status(200).json(user)
     } catch(e) {
         return res.status(400).json({ error: e })
