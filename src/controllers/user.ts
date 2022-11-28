@@ -10,7 +10,6 @@ const encryptedPassword = async (password: string): Promise<string> => {
 
 async function create(req: Request, res: Response) {
     try {
-        console.log(req.body)
         const { email, password } = req.body
         
         const hash = await encryptedPassword(password)
@@ -18,7 +17,7 @@ async function create(req: Request, res: Response) {
         
         return res.status(201).json({ data: user })
     } catch(e) {
-        return res.status(404).json({ error: e })
+        return res.status(400).json({ error: e })
     }
 }
 
