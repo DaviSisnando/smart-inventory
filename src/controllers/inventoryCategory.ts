@@ -25,10 +25,12 @@ async function listAll(_req: Request, res: Response) {
 async function listOne(req: Request, res: Response) {
     try {
         const { id } = req.params
-        const inventoryCategory = await InventoryCategory.findById(id)
+        const inventoryCategory = await InventoryCategory.findById(id).populate('produtos produtosRemessa')
+        const totalProducts = inventoryCategory?.produtos?.length
+        const totalShipping = inventoryCategory?.produtosRemessa?.length
         if (!inventoryCategory) return res.status(404).json({ error: 'InventoryCategory not found.' })
 
-        return res.status(200).json(inventoryCategory)
+        return res.status(200).json({inventoryCategory, totalProducts, totalShipping})
     } catch(e) {
         return res.status(400).json({ error: e })
     }

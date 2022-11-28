@@ -14,7 +14,7 @@ interface ProductFieldsDocument extends Document, ProductFields {
 }
 
 const ProductSchema: Schema = new Schema({
-    codigoDoProduto: [{type: String, required: true}],
+    codigoDoProduto: {type: String, required: true},
     nome: String,
     categoriaReferencia: {type: Types.ObjectId, required: true, ref: 'InventoryCategory'},
     categoriaProduto: String,
