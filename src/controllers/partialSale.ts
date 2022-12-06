@@ -64,4 +64,115 @@ async function deleteOne(req: Request, res: Response) {
     }
 }
 
-export {create, listAll, listOne, updateOne, deleteOne}
+async function profitData(req: Request, res: Response) {
+    try {
+        const { start, end } = req.params
+
+        const saleData = await Promise.all([
+            PartialSale.aggregate([
+                {
+                    $match: {
+                        'dataVenda': {$gte: new Date(start), $lte: new Date(end)}
+                    }
+                },
+                {
+                    $project: {
+                        qtdVendida: 1,
+                        valorCompraProdutoUnit: 1,
+                        valorVendaUnit: 1,
+                    }
+                },
+                {
+                    $addFields: {
+                        totalLucro: { $multiply: [{ $subtract: ["$valorVendaUnit", "$valorCompraProdutoUnit"] }, "$qtdVendida"] }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: {$sum: "$totalLucro"}
+                    }
+                }
+            ]),
+            PartialSale.aggregate([
+                {
+                    $match: {
+                        'dataVenda': {$gte: new Date(start), $lte: new Date(end)}
+                    }
+                },
+                {
+                    $project: {
+                        qtdVendida: 1,
+                        valorVendaUnit: 1,
+                    }
+                },
+                {
+                    $addFields: {
+                        totalVendido: { $multiply: ["$valorVendaUnit", "$qtdVendida"] }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: {$sum: "$totalVendido"}
+                    }
+                }
+            ])
+        ])
+        
+        const response = { totalLucro: parseFloat(saleData[0][0].total), totalVendido: parseFloat(saleData[1][0].total) }
+        return res.status(200).json(response)
+    } catch(e) {
+        return res.status(400).json({ error: e })
+    }
+}
+
+async function productQuantityProfit(req: Request, res: Response) {
+    try {
+        const { id, start, end } = req.params
+
+        console.log(id)
+
+        const product = await Product.findById(id)
+        if(!product) return res.status(404).json({ error: 'Product not found'})
+        const matchDateProduct = {
+            $match: {
+                'dataVenda': {$gte: new Date(start), $lte: new Date(end)},
+                'refDoProduto': id
+            }
+        }
+
+        const productData = await Promise.all([
+            PartialSale.aggregate([
+                matchDateProduct,
+                {
+                    $group: {
+                        _id: null,
+                        total: {$sum: "$qtdVendida"}
+                    }
+                }
+            ]),
+            PartialSale.aggregate([
+                matchDateProduct,
+                {
+                    $addFields: {
+                        totalLucro: { $multiply: [{ $subtract: ["$valorVendaUnit", "$valorCompraProdutoUnit"] }, "$qtdVendida"] }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: {$sum: "$totalLucro"}
+                    }
+                }
+            ])
+        ])
+
+        const response = { totalLucro: parseFloat(productData[0][0].total), totalVendido: parseFloat(productData[1][0].total) }
+        return res.status(200).json(response)
+    } catch(e) {
+        return res.status(400).json({ error: e })
+    }
+}
+
+export {create, listAll, listOne, updateOne, deleteOne, profitData, productQuantityProfit}

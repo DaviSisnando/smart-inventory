@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
+import mongoose from 'mongoose';
 import Product from '../models/Product'
 import Shipment from '../models/Shipment'
+const ObjectId = mongoose.Types.ObjectId;
 
 async function create(req: Request, res: Response) {
     try {
@@ -60,4 +62,53 @@ async function deleteOne(req: Request, res: Response) {
     }
 }
 
-export {create, listAll, listOne, updateOne, deleteOne}
+async function getTotalShipment(_req: Request, res: Response) {
+    try {
+        const shipments = await Shipment.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: "$qtdAtual"},
+                }
+            }
+        ])
+        return res.status(200).json({total: shipments[0].totalAmount})
+    } catch(e) {
+        return res.status(400).json({ error: e })
+    }
+}
+
+async function totalSpent(req: Request, res: Response) {
+    try {
+        const { id, start, end } = req.params
+
+        const product = await Product.findById(id)
+        if(!product) return res.status(404).json({ error: 'Product not found'})
+        const matchDateProduct = {
+            $match: {
+                'dataAquisicao': {$gte: new Date(start), $lte: new Date(end)},
+                'refProduto': new ObjectId(id)
+            }
+        }
+    
+        const totalProductSpent = await Shipment.aggregate([
+            matchDateProduct,
+            {
+                $addFields: {
+                    totalGasto: { $multiply: ["$qtdComprada", "$precoUnit"] }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: {$sum: "$totalGasto"}
+                }
+            }
+        ])
+        return res.status(200).json({ totalGasto: parseFloat(totalProductSpent[0].total) })
+    } catch(e) {
+        return res.status(400).json({ error: e })
+    }
+}
+
+export {create, listAll, listOne, updateOne, deleteOne, getTotalShipment, totalSpent}
