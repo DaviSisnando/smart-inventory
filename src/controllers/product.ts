@@ -69,7 +69,7 @@ async function listByName(req: Request, res: Response) {
         const { query } = req.params
         const product = await Product.find({nome:{$regex:query,$options:'i'}})
         if (!product) return res.status(404).json({ error: 'Product not found.' })
-
+        
         return res.status(200).json(product)
     } catch(e) {
         return res.status(400).json({ error: e })
