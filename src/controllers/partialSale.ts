@@ -6,9 +6,9 @@ import Shipment from '../models/Shipment'
 async function create(req: Request, res: Response) {
     try {
         const { refDoProduto, refDaRemessa } = req.body
-        const product = await Product.findById({ _id: refDoProduto })
+        // const product = await Product.findById({ _id: refDoProduto })
         const shipment = await Shipment.findById({ _id: refDaRemessa })
-        if(!product || !shipment) return res.status(404).json({ error: 'Produto ou remessa não foram encontrados. Tente novamente.' })
+        if(!shipment) return res.status(404).json({ error: 'Remessa não encontrada. Tente novamente.' })
 
         const partialSale = await PartialSale.create(req.body)
 

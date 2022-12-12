@@ -1,11 +1,19 @@
 import { Request, Response } from 'express'
 import Sales from '../models/Sales'
+import PartialSale from '../models/PartialSale'
+import Shipment from '../models/Shipment'
 
 async function create(req: Request, res: Response) {
     try {
-        const sales = await Sales.create(req.body)
+        const { comprador, dataVenda, refDaRemessa, qtdVendida, valorCompraProdutoUnit } = req.body
+        const sales = await Sales.create({ comprador, dataVenda })
+        const idVenda = sales?._id
 
-        return res.status(201).json({ data: sales })
+        const shipment = await Shipment.findById({ _id: refDaRemessa })
+        if(!shipment) return res.status(404).json({ error: 'Remessa não encontrada. Tente novamente.' })
+        const partialSale = await PartialSale.create({refDaRemessa, qtdVendida, valorCompraProdutoUnit, vendaId: idVenda})
+        
+        return res.status(201).json({ data: {sales, partialSale} })
     } catch(e) {
         return res.status(400).json({ error: e })
     }
