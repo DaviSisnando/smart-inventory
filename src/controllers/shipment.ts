@@ -19,7 +19,7 @@ async function create(req: Request, res: Response) {
 
 async function listAll(_req: Request, res: Response) {
     try {
-        const shipments = await Shipment.find()
+        const shipments = await Shipment.find().populate('refProduto')
         return res.status(200).json(shipments)
     } catch(e) {
         return res.status(400).json({ error: e })
