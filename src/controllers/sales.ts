@@ -65,6 +65,23 @@ async function deleteOne(req: Request, res: Response) {
     } catch(e) {
         return res.status(400).json({ error: e })
     }
+
+
+ 
 }
 
-export {create, listAll, listOne, updateOne, deleteOne}
+   
+async function listBy(req: Request, res: Response) {
+    try {
+       
+        const { query } = req.params
+        const product = await Sales.find({comprador:{$regex:query,$options:'i'}})
+        if (!product) return res.status(404).json({ error: 'Buyer  not found.' })
+        
+        return res.status(200).json(product)
+    } catch(e) {
+        return res.status(400).json({ error: e })
+    }
+}
+
+export {create, listAll, listOne, updateOne, deleteOne, listBy}
